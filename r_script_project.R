@@ -19,9 +19,9 @@ cfa_airline_data <- airline_data_all[-efad,]
 ####################################### EFA ################################
 
 #See how many factors to use
-#fa.parallel(efa_airline_data[1:2000, 9:22])
-#vss(efa_airline_data[1:2000, 9:22])
-#efa.ekc(efa_airline_data[1:2000, 9:22], nfactors(5))
+fa.parallel(efa_airline_data[1:50000, 9:22])
+vss(efa_airline_data[1:59000, 9:22])
+
 
 output2 <- efa(efa_airline_data[1:2000, 9:22], nfactors = 2, rotation = "oblimin")
 output3 <- efa(efa_airline_data[1:2000, 9:22], nfactors = 3, rotation = "oblimin")
@@ -48,11 +48,11 @@ model <- "Ground Service Quality =~ Departure.Arrival.time.convenient +
                                     Leg.room.service +
                                     Cleanliness
           On.board.service ~~ Inflight.entertainment
-          On.board.service ~~ Leg.room.service
-          
-"
-output <- cfa(model, cfa_airline_data, std.lv= T)
+          On.board.service ~~ Leg.room.service                
 
+"
+
+cfa <- cfa(model, cfa_airline_data, std.lv= T)
 
 print(summary(output, standardized = TRUE, fit.measures=T))
 
@@ -60,7 +60,7 @@ modindices(output, sort = TRUE)
 ################################### Measurement Invariance ########################
 
 #Configural Model
-mod1 <- "Ground Service Quality =~ Departure.Arrival.time.convenient + 
+modConf <- "Ground Service Quality =~ Departure.Arrival.time.convenient + 
                                     Ease.of.Online.booking +
                                     Gate.location 
           Flight Service Quality =~ Food.and.drink +
@@ -74,8 +74,8 @@ mod1 <- "Ground Service Quality =~ Departure.Arrival.time.convenient +
 
 "       
 
-fit1 <- cfa(mod1, cfa_airline_data, group = "Class", std.lv=TRUE)
-summary(fit1, fit.measures=T)
+fitConf <- cfa(modConf, cfa_airline_data, group = "Class", std.lv=TRUE)
+summary(fitConf, fit.measures=T)
 
 #Weak Invariance
 mod2 <- "Ground Service Quality =~ NA*Departure.Arrival.time.convenient + 
@@ -153,33 +153,33 @@ fitMeasures(fitMeans, c("tli","cfi","rmsea"))
 ###################################### Partial Invariance ######################
 
 #weak
-mod2p <- "Ground Service Quality =~ a*Departure.Arrival.time.convenient + 
-                                    d*Ease.of.Online.booking +
+modWeakp <- "Ground Service Quality =~ a*Departure.Arrival.time.convenient + 
+                                    b*Ease.of.Online.booking +
                                     Gate.location 
-          Flight Service Quality =~ e*Food.and.drink +
-                                    b*Seat.comfort +
+          Flight Service Quality =~ d*Food.and.drink +
+                                    e*Seat.comfort +
                                     f*Inflight.entertainment +
                                     On.board.service +
                                     Leg.room.service +
-                                    c*Cleanliness
+                                    g*Cleanliness
           On.board.service ~~ Inflight.entertainment
           On.board.service ~~ Leg.room.service
           Ground Service Quality ~~ c(1, NA, NA)*Ground Service Quality
           Flight Service Quality ~~ c(1, NA, NA)*Flight Service Quality
 "
-fitWeakp <- cfa(mod2p, cfa_airline_data, group="Class")
+fitWeakp <- cfa(modWeakp, cfa_airline_data, group="Class")
 summary(fitWeakp, fit.measures=T)
 
 #strong
-mod3p <- "Ground Service Quality =~ a*Departure.Arrival.time.convenient + 
-                                    d*Ease.of.Online.booking +
+modStrp <- "Ground Service Quality =~ a*Departure.Arrival.time.convenient + 
+                                    b*Ease.of.Online.booking +
                                     Gate.location 
-          Flight Service Quality =~ e*Food.and.drink +
-                                    b*Seat.comfort +
+          Flight Service Quality =~ d*Food.and.drink +
+                                    e*Seat.comfort +
                                     f*Inflight.entertainment +
                                     On.board.service +
                                     Leg.room.service +
-                                    c*Cleanliness
+                                    g*Cleanliness
           On.board.service ~~ Inflight.entertainment
           On.board.service ~~ Leg.room.service
           Ground Service Quality ~~ c(1, NA, NA)*Ground Service Quality
@@ -187,19 +187,54 @@ mod3p <- "Ground Service Quality =~ a*Departure.Arrival.time.convenient +
           Flight Service Quality ~ c(0, NA, NA)*1
           Ground Service Quality ~ c(0, NA, NA)*1
           
-          Departure.Arrival.time.convenient ~ t*1
-          Ease.of.Online.booking ~ t*1
-          Food.and.drink ~ t*1
-          Seat.comfort ~ t*1
+          Departure.Arrival.time.convenient ~ p*1
+          Ease.of.Online.booking ~ q*1
+          Food.and.drink ~ r*1
+          Seat.comfort ~ s*1
           Inflight.entertainment ~ t*1
-          Cleanliness ~ t*1
+          Cleanliness ~ u*1
           Gate.location ~ 1
           On.board.service ~ 1
           Leg.room.service ~ 1
 "
-fitStrp <- cfa(mod3p, data=cfa_airline_data, meanstructure=T, group = "Class")
-#summary(fitStrp, fit.measures=T)
+modStrp2 <- "Ground Service Quality =~ a*Departure.Arrival.time.convenient + 
+                                    b*Ease.of.Online.booking +
+                                    Gate.location 
+          Flight Service Quality =~ d*Food.and.drink +
+                                    e*Seat.comfort +
+                                    f*Inflight.entertainment +
+                                    On.board.service +
+                                    Leg.room.service +
+                                    g*Cleanliness
+          On.board.service ~~ Inflight.entertainment
+          On.board.service ~~ Leg.room.service
+          Ground Service Quality ~~ c(1, NA, NA)*Ground Service Quality
+          Flight Service Quality ~~ c(1, NA, NA)*Flight Service Quality
+          Flight Service Quality ~ c(0, NA, NA)*1
+          Ground Service Quality ~ c(0, NA, NA)*1
+          
+          Departure.Arrival.time.convenient ~ c(p, p1, p)*1
+          Ease.of.Online.booking ~ q*1
+          Food.and.drink ~ r*1
+          Seat.comfort ~ c(s, s1, s)*1
+          Inflight.entertainment ~ t*1
+          Cleanliness ~ u*1
+          Gate.location ~ 1
+          On.board.service ~ 1
+          Leg.room.service ~ 1
+"
+
+#Partial Latent Means
+
+#fitStrp <- cfa(modStrp, data=cfa_airline_data, meanstructure=T, group = "Class")
+fitStrp2 <- cfa(modStrp2, data=cfa_airline_data, meanstructure=T, group = "Class")
+summary(fitStrp2, fit.measures=T)
+
+lavTestLRT(fit1, fitWeak, fitWeakp, fitStrp, fitStrp2)
 
 
+fitMeasures(cfa,  c("tli", "cfi","rmsea"))
+fitMeasures(fitConf,  c("tli", "cfi","rmsea"))
 fitMeasures(fitWeakp, c("tli", "cfi","rmsea"))
 fitMeasures(fitStrp, c("tli", "cfi","rmsea"))
+fitMeasures(fitStrp2, c("tli", "cfi","rmsea"))
