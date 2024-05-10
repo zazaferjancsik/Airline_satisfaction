@@ -1,8 +1,8 @@
 setwd("~/Documents/UCU/Stats 3/Group Project")
 library(lavaan)
 library(tidyverse)
-library(semTools)
 library(psych)
+
 
 airline_data_all <- read.csv("train.csv")
 airline_data_all[airline_data_all == 0] <- NA
@@ -52,9 +52,9 @@ model <- "Ground Service Quality =~ Departure.Arrival.time.convenient +
 
 "
 
-cfa <- cfa(model, cfa_airline_data, std.lv= T)
+fitcfa <- cfa(model, cfa_airline_data, std.lv= T, meanstructure = T)
 
-print(summary(output, standardized = TRUE, fit.measures=T))
+print(summary(fitcfa, standardized = TRUE, fit.measures=T))
 
 modindices(output, sort = TRUE)
 ################################### Measurement Invariance ########################
@@ -230,10 +230,9 @@ modStrp2 <- "Ground Service Quality =~ a*Departure.Arrival.time.convenient +
 fitStrp2 <- cfa(modStrp2, data=cfa_airline_data, meanstructure=T, group = "Class")
 summary(fitStrp2, fit.measures=T)
 
-lavTestLRT(fit1, fitWeak, fitWeakp, fitStrp, fitStrp2)
+lavTestLRT(fitcfa, fitWeak, fitWeakp, fitStrp, fitStrp2)
 
-
-fitMeasures(cfa,  c("tli", "cfi","rmsea"))
+fitMeasures(fitcfa,  c("tli", "cfi","rmsea"))
 fitMeasures(fitConf,  c("tli", "cfi","rmsea"))
 fitMeasures(fitWeakp, c("tli", "cfi","rmsea"))
 fitMeasures(fitStrp, c("tli", "cfi","rmsea"))
