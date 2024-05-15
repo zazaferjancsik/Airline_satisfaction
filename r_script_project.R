@@ -78,7 +78,7 @@ fitConf <- cfa(modConf, cfa_airline_data, group = "Class", std.lv=TRUE)
 summary(fitConf, fit.measures=T)
 
 #Weak Invariance
-mod2 <- "Ground Service Quality =~ NA*Departure.Arrival.time.convenient + 
+modWeak <- "Ground Service Quality =~ NA*Departure.Arrival.time.convenient + 
                                     Ease.of.Online.booking +
                                     Gate.location 
           Flight Service Quality =~ NA*Food.and.drink +
@@ -92,8 +92,8 @@ mod2 <- "Ground Service Quality =~ NA*Departure.Arrival.time.convenient +
           Ground Service Quality ~~ c(1, NA, NA)*Ground Service Quality
           Flight Service Quality ~~ c(1, NA, NA)*Flight Service Quality
 "
-fitWeak <- cfa(mod2, cfa_airline_data, group="Class", group.equal = c("loadings"))
-summary(fitweak, fit.measures=T)
+fitWeak <- cfa(modWeak, cfa_airline_data, group="Class", group.equal = c("loadings"), std.lv= T)
+summary(fitWeak, fit.measures=T)
 
 lavTestLRT(fit1, fitWeak)
 
@@ -115,7 +115,7 @@ mod3 <- "Ground Service Quality =~ NA*Departure.Arrival.time.convenient +
           Flight Service Quality ~ c(0, NA, NA)*1
           Ground Service Quality ~ c(0, NA, NA)*1
 "
-fitStr <- cfa(mod3, data=cfa_airline_data, meanstructure=T, group = "Class", group.equal = c("loadings", "intercepts"))
+fitStr <- cfa(mod3, data=cfa_airline_data, std.lv= T, meanstructure=T, group = "Class", group.equal = c("loadings", "intercepts"))
 
 fitMeasures(fitStr, c("tli", "cfi","rmsea"))
 summary(fitStr, fit.measures=T)
@@ -138,7 +138,7 @@ mod3 <- "Ground Service Quality =~ NA*Departure.Arrival.time.convenient +
           Flight Service Quality ~ c(0, 0, 0)*1
 "
 
-fitMeans <- cfa(mod3, data=cfa_airline_data, meanstructure=T, group = "Class", group.equal = c("loadings", "intercepts"))
+fitMeans <- cfa(mod3, data=cfa_airline_data, std.lv= T, meanstructure=T, group = "Class", group.equal = c("loadings", "intercepts"))
 
 summary(fitMeans)
 
@@ -167,7 +167,7 @@ modWeakp <- "Ground Service Quality =~ a*Departure.Arrival.time.convenient +
           Ground Service Quality ~~ c(1, NA, NA)*Ground Service Quality
           Flight Service Quality ~~ c(1, NA, NA)*Flight Service Quality
 "
-fitWeakp <- cfa(modWeakp, cfa_airline_data, group="Class")
+fitWeakp <- cfa(modWeakp,std.lv= T, cfa_airline_data, group="Class")
 summary(fitWeakp, fit.measures=T)
 
 #strong
@@ -224,10 +224,10 @@ modStrp2 <- "Ground Service Quality =~ a*Departure.Arrival.time.convenient +
           Leg.room.service ~ 1
 "
 
-#Partial Latent Means
+
 
 #fitStrp <- cfa(modStrp, data=cfa_airline_data, meanstructure=T, group = "Class")
-fitStrp2 <- cfa(modStrp2, data=cfa_airline_data, meanstructure=T, group = "Class")
+fitStrp2 <- cfa(modStrp2, data=cfa_airline_data, meanstructure=T,std.lv= T, group = "Class")
 summary(fitStrp2, fit.measures=T)
 
 lavTestLRT(fitcfa, fitWeak, fitWeakp, fitStrp, fitStrp2)
